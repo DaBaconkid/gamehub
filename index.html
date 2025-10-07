@@ -1,41 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Game Hub</title>
+  <meta charset="UTF-8">
+  <title>Game Hub</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 40px;
+    }
+    h1 {
+      color: #333;
+    }
+    .game-section {
+      border: 1px solid #ccc;
+      padding: 20px;
+      margin: 40px 0;
+    }
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+    }
+    td {
+      width: 60px;
+      height: 60px;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 24px;
+      border: 1px solid #000;
+      cursor: pointer;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-    <h1>🎮 Welcome to Game Hub!</h1>
-    <p>Select a game to play:</p>
 
-    <ul>
-        <li><a href="#game1">Tic Tac Toe</a></li>
-        <li><a href="#game2">Memory Match</a></li>
-        <li><a href="#game3">Number Guessing</a></li>
-        <li><a href="#game4">Rock Paper Scissors</a></li>
-        <li><a href="#game5">Snake (Coming Soon)</a></li>
-    </ul>
+  <h1>🎮 Welcome to Game Hub!</h1>
+  <p>Select a game to play:</p>
+  <ul>
+    <li><a href="#tic-tac-toe">Tic Tac Toe</a></li>
+    <li><a href="#number-guess">Number Guessing</a></li>
+    <li><a href="#rps">Rock Paper Scissors</a></li>
+  </ul>
 
+  <div class="game-section" id="tic-tac-toe">
+    <h2>Tic Tac Toe</h2>
+    <table id="board">
+      <tr>
+        <td onclick="makeMove(this, 0)"></td>
+        <td onclick="makeMove(this, 1)"></td>
+        <td onclick="makeMove(this, 2)"></td>
+      </tr>
+      <tr>
+        <td onclick="makeMove(this, 3)"></td>
+        <td onclick="makeMove(this, 4)"></td>
+        <td onclick="makeMove(this, 5)"></td>
+      </tr>
+      <tr>
+        <td onclick="makeMove(this, 6)"></td>
+        <td onclick="makeMove(this, 7)"></td>
+        <td onclick="makeMove(this, 8)"></td>
+      </tr>
+    </table>
+    <p id="ttt-result"></p>
+    <button onclick="resetBoard()">Reset</button>
+  </div>
+
+  <div class="game-section" id="number-guess">
+    <h2>Number Guessing Game</h2>
+    <p>Guess a number between 1 and 10:</p>
+    <input type="number" id="guess" min="1" max="10">
+    <button onclick="checkGuess()">Guess</button>
+    <p id="guess-result"></p>
+    <button onclick="resetGuess()">Reset</button>
+  </div>
+
+  <div class="game-section" id="rps">
+    <h2>Rock Paper Scissors</h2>
+    <button onclick="playRPS('rock')">Rock</button>
+    <button onclick="playRPS('paper')">Paper</button>
+    <button onclick="playRPS('scissors')">Scissors</button>
+    <p id="rps-result"></p>
+  </div>
+
+  <footer>
     <hr>
+    <p>&copy; 2025 Game Hub</p>
+  </footer>
 
-    <h2 id="game1">Tic Tac Toe</h2>
-    <p>This is where Tic Tac Toe will go.</p>
+  <script>
+    // ===== Tic Tac Toe =====
+    let board = ["", "", "", "", "", "", "", "", ""];
+    let currentPlayer = "X";
+    let gameOver = false;
 
-    <h2 id="game2">Memory Match</h2>
-    <p>This is where Memory Match will go.</p>
+    function makeMove(cell, index) {
+      if (board[index] === "" && !gameOver) {
+        board[index] = currentPlayer;
+        cell.textContent = currentPlayer;
+        if (checkWin()) {
+          document.getElementById("ttt-result").textContent = currentPlayer + " wins!";
+          gameOver = true;
+        } else if (board.every(cell => cell !== "")) {
+          document.getElementById("ttt-result").textContent = "It's a draw!";
+          gameOver = true;
+        } else {
+          currentPlayer = currentPlayer === "X" ? "O" : "X";
+        }
+      }
+    }
 
-    <h2 id="game3">Number Guessing</h2>
-    <p>This is where Number Guessing will go.</p>
+    function checkWin() {
+      const winCombos = [
+        [0,1,2], [3,4,5], [6,7,8], // rows
+        [0,3,6], [1,4,7], [2,5,8], // cols
+        [0,4,8], [2,4,6]           // diagonals
+      ];
+      return winCombos.some(combo => 
+        combo.every(i => board[i] === currentPlayer)
+      );
+    }
 
-    <h2 id="game4">Rock Paper Scissors</h2>
-    <p>This is where Rock Paper Scissors will go.</p>
+    function resetBoard() {
+      board = ["", "", "", "", "", "", "", "", ""];
+      currentPlayer = "X";
+      gameOver = false;
+      const cells = document.querySelectorAll("#board td");
+      cells.forEach(cell => cell.textContent = "");
+      document.getElementById("ttt-result").textContent = "";
+    }
 
-    <h2 id="game5">Snake (Coming Soon)</h2>
-    <p>Snake is under development. Stay tuned!</p>
+    // ===== Number Guessing Game =====
+    let targetNumber = Math.floor(Math.random() * 10) + 1;
 
-    <hr>
-    <footer>
-        <p>&copy; 2025 Game Hub. All rights reserved.</p>
-    </footer>
+    function checkGuess() {
+      const guess = parseInt(document.getElementById("guess").value);
+      const result = document.getElementById("guess-result");
+      if (guess === targetNumber) {
+        result.textContent = "🎉 Correct! You guessed the number!";
+      } else if (guess > targetNumber) {
+        result.textContent = "Too high! Try again.";
+      } else {
+        result.textContent = "Too low! Try again.";
+      }
+    }
+
+    function resetGuess() {
+      targetNumber = Math.floor(Math.random() * 10) + 1;
+      document.getElementById("guess").value = "";
+      document.getElementById("guess-result").textContent = "";
+    }
+
+    // ===== Rock Paper Scissors =====
+    function playRPS(playerChoice) {
+      const choices = ["rock", "paper", "scissors"];
+      const computerChoice = choices[Math.floor(Math.random() * 3)];
+      let result = "";
+
+      if (playerChoice === computerChoice) {
+        result = "It's a draw!";
+      } else if (
+        (playerChoice === "rock" && computerChoice === "scissors") ||
+        (playerChoice === "paper" && computerChoice === "rock") ||
+        (playerChoice === "scissors" && computerChoice === "paper")
+      ) {
+        result = `You win! ${playerChoice} beats ${computerChoice}`;
+      } else {
+        result = `You lose! ${computerChoice} beats ${playerChoice}`;
+      }
+
+      document.getElementById("rps-result").textContent = result;
+    }
+  </script>
+
 </body>
 </html>
