@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Game Hub by DaBaconKid</title>
   <style>
     * {
@@ -10,134 +10,243 @@
     }
     body {
       margin: 0;
-      padding: 0;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(to bottom right, #1e3c72, #2a5298);
       color: #f0f0f0;
-      text-align: center;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      align-items: center;
     }
     header {
       padding: 20px;
+      text-align: center;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
     header h1 {
       margin: 0;
-      font-size: 2.5em;
+      font-size: 2.8em;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+      user-select: none;
     }
-    nav ul {
-      list-style: none;
-      padding: 0;
+    nav {
+      margin-top: 10px;
     }
-    nav ul li {
-      display: inline-block;
-      margin: 0 10px;
-    }
-    nav ul li a {
-      color: #ffea61;
-      text-decoration: none;
+    nav button {
+      background: #ffea61;
+      color: #222;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 20px;
+      margin: 8px;
       font-weight: bold;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background 0.3s;
+      user-select: none;
     }
-    .container {
+    nav button:hover {
+      background: #ffd633;
+    }
+    main {
       flex: 1;
       width: 100%;
-      max-width: 800px;
-      margin: auto;
+      max-width: 850px;
       padding: 20px;
-      background: rgba(0,0,0,0.4);
-      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+      overflow: auto;
+      min-height: 400px;
     }
-    .game-section {
-      margin: 40px 0;
-      padding: 20px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 8px;
+    section {
+      display: none;
+    }
+    section.active {
+      display: block;
     }
     h2 {
-      margin-top: 0;
-      font-size: 1.8em;
+      font-size: 2em;
+      margin-bottom: 12px;
+      user-select: none;
     }
-    table {
+    .back-button {
+      margin-top: 15px;
+      background: #0af;
+      color: #fff;
+      font-weight: bold;
+      border-radius: 6px;
+      padding: 10px 18px;
+      border: none;
+      cursor: pointer;
+      user-select: none;
+    }
+    .back-button:hover {
+      background: #08c;
+    }
+    /* Tic Tac Toe */
+    #tic-tac-toe table {
       margin: 20px auto;
       border-collapse: collapse;
     }
-    td {
+    #tic-tac-toe td {
       width: 60px;
       height: 60px;
       border: 2px solid #ddd;
-      font-size: 2em;
+      font-size: 2.4em;
       color: #f0f0f0;
       cursor: pointer;
       background: rgba(255,255,255,0.05);
+      user-select: none;
+      transition: background 0.2s;
+      text-align: center;
+      vertical-align: middle;
     }
-    input[type=number] {
-      padding: 8px;
-      font-size: 1em;
-      border-radius: 4px;
-      border: none;
-      margin-right: 10px;
+    #tic-tac-toe td:hover:not(.disabled) {
+      background: rgba(255,255,255,0.15);
     }
-    button {
-      padding: 10px 18px;
-      font-size: 1em;
-      margin: 5px;
+    #tic-tac-toe button {
+      margin-top: 10px;
       background: #ffea61;
       color: #333;
-      border: none;
+    }
+
+    /* Number Guess */
+    #number-guess input[type=number] {
+      padding: 10px;
+      font-size: 1.2em;
       border-radius: 6px;
+      border: none;
+      margin-right: 10px;
+      width: 80px;
+    }
+    #number-guess button {
+      background: #ffea61;
+      color: #333;
+      font-weight: bold;
+      border-radius: 6px;
+      padding: 10px 20px;
+      border: none;
       cursor: pointer;
-      transition: transform 0.1s;
     }
-    button:active {
-      transform: scale(0.95);
+    #number-guess p {
+      margin-top: 15px;
+      font-size: 1.2em;
     }
+
+    /* Rock Paper Scissors */
+    #rps button {
+      background: #ffea61;
+      color: #333;
+      font-weight: bold;
+      border-radius: 6px;
+      padding: 12px 24px;
+      margin: 10px 15px;
+      font-size: 1.2em;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.3s;
+    }
+    #rps button:hover {
+      background: #ffd633;
+    }
+    #rps p {
+      margin-top: 20px;
+      font-size: 1.3em;
+    }
+
+    /* Snake */
     #snakeCanvas {
       background: #111;
       display: block;
       margin: 0 auto;
       border: 2px solid #ddd;
+      border-radius: 8px;
+      touch-action: none;
+    }
+    #snakeScore {
+      font-size: 1.3em;
+      margin-top: 12px;
+      user-select: none;
+    }
+    #snake button {
+      margin-top: 15px;
+      background: #ffea61;
+      color: #333;
+      font-weight: bold;
       border-radius: 6px;
+      padding: 10px 24px;
+      border: none;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.3s;
     }
-    footer {
-      padding: 15px;
-      font-size: 0.9em;
-      background: rgba(0,0,0,0.5);
+    #snake button:hover {
+      background: #ffd633;
     }
+
+    /* Main Menu */
+    #main-menu nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    /* Responsive */
     @media (max-width: 600px) {
-      td {
+      #tic-tac-toe td {
         width: 40px;
         height: 40px;
-        font-size: 1.5em;
+        font-size: 1.6em;
       }
       #snakeCanvas {
         width: 260px !important;
         height: 260px !important;
       }
+      nav button {
+        margin: 8px 5px;
+        padding: 10px 14px;
+        font-size: 0.95em;
+      }
+    }
+
+    footer {
+      margin-top: 20px;
+      padding: 15px;
+      font-size: 0.9em;
+      width: 100%;
+      background: rgba(0,0,0,0.5);
+      text-align: center;
+      user-select: none;
     }
   </style>
 </head>
 <body>
-
   <header>
     <h1>Game Hub</h1>
-    <nav>
-      <ul>
-        <li><a href="#tic-tac-toe">Tic Tac Toe</a></li>
-        <li><a href="#number-guess">Guess Number</a></li>
-        <li><a href="#rps">Rock Paper Scissors</a></li>
-        <li><a href="#snake">Snake</a></li>
-      </ul>
-    </nav>
   </header>
 
-  <div class="container">
+  <main>
+    <!-- Main Menu -->
+    <section id="main-menu" class="active">
+      <h2>Welcome to Game Hub</h2>
+      <nav>
+        <button onclick="showSection('tic-tac-toe')">Tic Tac Toe</button>
+        <button onclick="showSection('number-guess')">Number Guess</button>
+        <button onclick="showSection('rps')">Rock Paper Scissors</button>
+        <button onclick="showSection('snake')">Snake</button>
+        <button onclick="showSection('memory')">Memory Match</button>
+        <button onclick="showSection('maze')">Maze</button>
+      </nav>
+    </section>
 
     <!-- Tic Tac Toe -->
-    <div class="game-section" id="tic-tac-toe">
+    <section id="tic-tac-toe" aria-label="Tic Tac Toe game">
       <h2>Tic Tac Toe</h2>
-      <table id="board">
+      <table>
         <tr>
           <td onclick="makeMove(this, 0)"></td>
           <td onclick="makeMove(this, 1)"></td>
@@ -156,59 +265,99 @@
       </table>
       <p id="ttt-result"></p>
       <button onclick="resetBoard()">Reset Tic Tac Toe</button>
-    </div>
+      <button class="back-button" onclick="showSection('main-menu')">Back to Game Hub</button>
+    </section>
 
     <!-- Number Guessing -->
-    <div class="game-section" id="number-guess">
+    <section id="number-guess" aria-label="Number Guessing game">
       <h2>Number Guessing</h2>
       <p>Guess a number between 1 and 20:</p>
-      <input type="number" id="guess" min="1" max="20">
+      <input type="number" id="guess" min="1" max="20" />
       <button onclick="checkGuess()">Guess</button>
       <p id="guess-result"></p>
       <button onclick="resetGuess()">Reset Number Game</button>
-    </div>
+      <button class="back-button" onclick="showSection('main-menu')">Back to Game Hub</button>
+    </section>
 
     <!-- Rock Paper Scissors -->
-    <div class="game-section" id="rps">
+    <section id="rps" aria-label="Rock Paper Scissors game">
       <h2>Rock Paper Scissors</h2>
       <button onclick="playRPS('rock')">Rock</button>
       <button onclick="playRPS('paper')">Paper</button>
       <button onclick="playRPS('scissors')">Scissors</button>
       <p id="rps-result"></p>
-    </div>
+      <button class="back-button" onclick="showSection('main-menu')">Back to Game Hub</button>
+    </section>
 
-    <!-- Snake Game -->
-    <div class="game-section" id="snake">
+    <!-- Snake -->
+    <section id="snake" aria-label="Snake game">
       <h2>Snake</h2>
-      <canvas id="snakeCanvas" width="300" height="300"></canvas>
+      <canvas id="snakeCanvas" width="300" height="300" tabindex="0"></canvas>
       <p id="snakeScore">Score: 0</p>
       <button onclick="startSnake()">Start Snake</button>
-    </div>
+      <button class="back-button" onclick="showSection('main-menu'); stopSnake();">Back to Game Hub</button>
+    </section>
 
-  </div>
+    <!-- Memory Match -->
+    <section id="memory" aria-label="Memory Match game">
+      <h2>Memory Match</h2>
+      <p>Find matching pairs by clicking cards!</p>
+      <div id="memory-grid" style="max-width: 360px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;"></div>
+      <p id="memory-result"></p>
+      <button onclick="resetMemory()">Reset Memory Match</button>
+      <button class="back-button" onclick="showSection('main-menu')">Back to Game Hub</button>
+    </section>
+
+    <!-- Maze -->
+    <section id="maze" aria-label="Maze game">
+      <h2>Simple Maze</h2>
+      <canvas id="mazeCanvas" width="400" height="400" style="border: 2px solid #ddd; border-radius: 10px; display: block; margin: 0 auto;"></canvas>
+      <p>Use arrow keys to move the blue square to the green exit.</p>
+      <p id="maze-result" style="font-size: 1.2em; font-weight: bold;"></p>
+      <button onclick="startMaze()">Start Maze</button>
+      <button class="back-button" onclick="showSection('main-menu'); stopMaze();">Back to Game Hub</button>
+    </section>
+  </main>
 
   <footer>
     &copy; 2025 DaBaconKid
   </footer>
 
   <script>
-    // ========== Tic Tac Toe ==========
-    let board = ["","","","","","","","",""];
-    let currentPlayer = "X";
-    let gameOver = false;
+    // Navigation between sections
+    function showSection(id) {
+      document.querySelectorAll("main section").forEach(section => {
+        section.classList.remove("active");
+      });
+      document.getElementById(id).classList.add("active");
+      // Stop any running games when leaving their section
+      if(id !== 'snake') stopSnake();
+      if(id !== 'maze') stopMaze();
+      if(id !== 'memory') resetMemorySelection();
+    }
+
+    // =========== Tic Tac Toe ===========
+    let tttBoard = ["","","","","","","","",""];
+    let tttCurrentPlayer = "X";
+    let tttGameOver = false;
+    const tttCells = [];
+
+    // Cache cells
+    document.querySelectorAll("#tic-tac-toe td").forEach(cell => tttCells.push(cell));
 
     function makeMove(cell, idx) {
-      if (board[idx] === "" && !gameOver) {
-        board[idx] = currentPlayer;
-        cell.textContent = currentPlayer;
+      if (tttBoard[idx] === "" && !tttGameOver) {
+        tttBoard[idx] = tttCurrentPlayer;
+        cell.textContent = tttCurrentPlayer;
+        cell.classList.add("disabled");
         if (checkWin()) {
-          document.getElementById("ttt-result").textContent = currentPlayer + " wins!";
-          gameOver = true;
-        } else if (board.every(c => c !== "")) {
+          document.getElementById("ttt-result").textContent = tttCurrentPlayer + " wins!";
+          tttGameOver = true;
+        } else if (tttBoard.every(c => c !== "")) {
           document.getElementById("ttt-result").textContent = "It's a draw!";
-          gameOver = true;
+          tttGameOver = true;
         } else {
-          currentPlayer = currentPlayer === "X" ? "O" : "X";
+          tttCurrentPlayer = tttCurrentPlayer === "X" ? "O" : "X";
         }
       }
     }
@@ -219,18 +368,21 @@
         [0,3,6],[1,4,7],[2,5,8],
         [0,4,8],[2,4,6]
       ];
-      return combos.some(c => c.every(i => board[i] === currentPlayer));
+      return combos.some(c => c.every(i => tttBoard[i] === tttCurrentPlayer));
     }
 
     function resetBoard() {
-      board = ["","","","","","","","",""];
-      currentPlayer = "X";
-      gameOver = false;
-      document.querySelectorAll("#board td").forEach(cell => cell.textContent = "");
+      tttBoard = ["","","","","","","","",""];
+      tttCurrentPlayer = "X";
+      tttGameOver = false;
+      tttCells.forEach(cell => {
+        cell.textContent = "";
+        cell.classList.remove("disabled");
+      });
       document.getElementById("ttt-result").textContent = "";
     }
 
-    // ========== Number Guessing ==========
+    // =========== Number Guess ===========
     let targetNumber = Math.floor(Math.random() * 20) + 1;
 
     function checkGuess() {
@@ -255,7 +407,7 @@
       document.getElementById("guess-result").textContent = "";
     }
 
-    // ========== Rock Paper Scissors ==========
+    // =========== Rock Paper Scissors ===========
     function playRPS(choice) {
       const opts = ["rock","paper","scissors"];
       const comp = opts[Math.floor(Math.random() * 3)];
@@ -274,123 +426,9 @@
       document.getElementById("rps-result").textContent = outcome;
     }
 
-    // ========== Snake ==========
-    const canvas = document.getElementById("snakeCanvas");
-    const ctx = canvas.getContext("2d");
+    // =========== Snake ===========
+    const snakeCanvas = document.getElementById("snakeCanvas");
+    const snakeCtx = snakeCanvas.getContext("2d");
     const scale = 15;
-    const rows = canvas.height / scale;
-    const cols = canvas.width / scale;
-
-    let snake;
-    let fruit;
-
-    function Snake() {
-      this.body = [];
-      this.body[0] = { x: Math.floor(cols/2), y: Math.floor(rows/2) };
-      this.xdir = 0;
-      this.ydir = 0;
-      this.score = 0;
-
-      this.draw = function() {
-        ctx.fillStyle = "#0f0";
-        for (let i = 0; i < this.body.length; i++) {
-          ctx.fillRect(this.body[i].x * scale, this.body[i].y * scale, scale, scale);
-        }
-      };
-
-      this.update = function() {
-        const head = { x: this.body[0].x + this.xdir, y: this.body[0].y + this.ydir };
-        this.body.unshift(head);
-
-        if (head.x === fruit.x && head.y === fruit.y) {
-          this.score++;
-          document.getElementById("snakeScore").textContent = "Score: " + this.score;
-          placeFruit();
-        } else {
-          this.body.pop();
-        }
-
-        // check collisions with walls or self
-        if (
-          head.x < 0 || head.x >= cols ||
-          head.y < 0 || head.y >= rows ||
-          this.selfCollision()
-        ) {
-          stopSnake();
-        }
-      };
-
-      this.selfCollision = function() {
-        for (let i = 1; i < this.body.length; i++) {
-          if (this.body[i].x === this.body[0].x && this.body[i].y === this.body[0].y) {
-            return true;
-          }
-        }
-        return false;
-      };
-
-      this.changeDirection = function(dir) {
-        if (dir === "Up" && this.ydir !== 1) {
-          this.xdir = 0; this.ydir = -1;
-        } else if (dir === "Down" && this.ydir !== -1) {
-          this.xdir = 0; this.ydir = 1;
-        } else if (dir === "Left" && this.xdir !== 1) {
-          this.xdir = -1; this.ydir = 0;
-        } else if (dir === "Right" && this.xdir !== -1) {
-          this.xdir = 1; this.ydir = 0;
-        }
-      };
-    }
-
-    function placeFruit() {
-      fruit = {
-        x: Math.floor(Math.random() * cols),
-        y: Math.floor(Math.random() * rows)
-      };
-    }
-
-    let snakeInterval;
-
-    function drawFruit() {
-      ctx.fillStyle = "#f00";
-      ctx.fillRect(fruit.x * scale, fruit.y * scale, scale, scale);
-    }
-
-    function loop() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      snake.draw();
-      snake.update();
-      drawFruit();
-    }
-
-    function startSnake() {
-      snake = new Snake();
-      placeFruit();
-      document.getElementById("snakeScore").textContent = "Score: 0";
-      if (snakeInterval) clearInterval(snakeInterval);
-      snakeInterval = setInterval(loop, 150);
-      window.addEventListener("keydown", keyPush);
-    }
-
-    function stopSnake() {
-      clearInterval(snakeInterval);
-      window.removeEventListener("keydown", keyPush);
-      ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#fff";
-      ctx.font = "24px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
-    }
-
-    function keyPush(evt) {
-      const key = evt.key;
-      if (key === "ArrowUp") snake.changeDirection("Up");
-      else if (key === "ArrowDown") snake.changeDirection("Down");
-      else if (key === "ArrowLeft") snake.changeDirection("Left");
-      else if (key === "ArrowRight") snake.changeDirection("Right");
-    }
-  </script>
-
-</body>
-</html>
+    const rows = snakeCanvas.height / scale;
+    const cols = snakeCanvas
