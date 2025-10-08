@@ -2,71 +2,349 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 <title>Game Hub</title>
 <style>
-/* KEEP ORIGINAL STYLE FROM YOUR CODE */
-* { box-sizing: border-box; }
-body { margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg,#292E49 0%,#536976 100%); color:white; min-height:100vh; display:flex; flex-direction:column; }
-header { background:#1F2235; padding:15px 20px; text-align:center; font-size:2rem; font-weight:700; letter-spacing:2px; user-select:none; text-shadow:1px 1px 3px #000000aa; }
-main { flex-grow:1; padding:20px; }
-footer { text-align:center; padding:12px; font-size:0.9rem; background:#1F2235; user-select:none; }
-button { cursor:pointer; background:#536976; border:none; color:white; padding:12px 20px; font-size:1.1rem; border-radius:10px; margin:10px 15px; box-shadow:0 4px 8px rgba(83,105,118,.4); transition:all .25s ease; }
-button:hover { background:#6D8A9F; }
-.back-btn { background:#ff6f61; }
-.gamehub-menu { display:flex; flex-wrap:wrap; justify-content:center; max-width:800px; margin:0 auto; }
-main section { display:none; }
-main section.active { display:block; }
-.game-content { max-width:480px; margin:0 auto; text-align:center; }
-canvas { background:#111; border-radius:12px; margin-top:15px; }
-#ticTacToeBoard td { border:3px solid #536976; text-align:center; vertical-align:middle; font-size:3rem; cursor:pointer; }
-#memory-grid { display:grid; gap:10px; margin:20px auto; max-width:480px; }
-#memory-grid button { background:#1f2937; border-radius:10px; font-size:2.4rem; line-height:1; padding:18px 0; }
+  /* Reset & basics */
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #292E49 0%, #536976 100%); color: white; min-height: 100vh; display: flex; flex-direction: column; }
+  header { background: #1F2235; padding: 15px 20px; text-align: center; font-size: 2rem; font-weight: 700; letter-spacing: 2px; user-select: none; text-shadow: 1px 1px 3px #000000aa; }
+  main { flex-grow: 1; padding: 20px; }
+  footer { text-align: center; padding: 12px; font-size: 0.9rem; background: #1F2235; user-select: none; }
+
+  button { cursor: pointer; background: #536976; border: none; color: white; padding: 12px 20px; font-size: 1.1rem; border-radius: 10px; margin: 10px 15px; box-shadow: 0 4px 8px rgb(83 105 118 / 0.4); transition: all 0.22s ease; }
+  button:hover, button:focus { background: #6D8A9F; outline: none; box-shadow: 0 6px 12px rgb(83 105 118 / 0.7); }
+  button:active { transform: scale(0.97); }
+  .gamehub-menu { display: flex; flex-wrap: wrap; justify-content: center; max-width: 960px; margin: 0 auto; }
+
+  /* Sections hidden by default, only .active shows */
+  main section { display: none; }
+  main section.active { display: block; }
+
+  /* Center game content */
+  .game-content { max-width: 640px; margin: 0 auto; text-align: center; }
+
+  /* Canvas style */
+  canvas { background: #111; border-radius: 12px; margin-top: 15px; touch-action: none; user-select:none; }
+
+  /* Back button style */
+  .back-btn { display: inline-block; margin-top: 20px; background: #ff6f61; }
+
+  /* Tic Tac Toe board */
+  #ticTacToeBoard { margin: 15px auto; border-collapse: collapse; width: 280px; height: 280px; box-shadow: 0 0 8px #444 inset; border-radius: 12px; user-select:none; }
+  #ticTacToeBoard td { border: 3px solid #536976; text-align: center; vertical-align: middle; font-size: 3rem; cursor: pointer; color: #F9F871; transition: background-color 0.2s ease; }
+  #ticTacToeBoard td:hover { background-color: #444d61; }
+  #ticTacToeBoard td.taken { cursor: default; color: #a1ffb1; }
+
+  /* Memory Match grid */
+  #memory-grid { display: grid; gap: 10px; margin: 20px auto; max-width: 480px; user-select:none; }
+  #memory-grid button { background: #1f2937; border-radius: 10px; font-size: 2.4rem; line-height: 1; padding: 18px 0; box-shadow: 0 3px 8px #000a inset; width: 100%; }
+  #memory-result { margin-top: 12px; font-weight: 600; min-height: 1.3em; color: #ffd500; }
+
+  /* Number guess */
+  #numberGuessInput { width: 70%; padding: 10px; font-size: 1.1rem; border-radius: 10px; border: none; margin: 10px 0; outline: none; text-align: center; }
+  #numberGuessMax { width: 120px; padding: 8px; border-radius: 8px; border: none; margin-left: 10px; font-size: 1rem; text-align: center; }
+  #numberGuessMsg { margin: 12px 0; font-weight: 600; color: #ffd500; min-height: 1.2em; }
+
+  /* Whack-a-mole grid */
+  .mole-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 360px; margin: 12px auto; }
+  .mole-grid button { height: 100px; border-radius: 10px; font-size: 2.6rem; background:#1f2937; border:none; }
+
+  /* Simon buttons */
+  .simon-grid { display:grid; grid-template-columns: repeat(2, 140px); gap:12px; justify-content:center; margin:12px auto; }
+  .simon-btn { width:140px; height:140px; border-radius:12px; border:none; box-shadow: inset 0 4px 10px rgba(0,0,0,0.4); font-size:1.4rem; }
+  .simon-active { transform: scale(1.06); filter:brightness(1.2); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .game-content { padding: 8px; }
+    button { margin: 8px 6px; font-size: 1rem; padding: 10px 14px; }
+    #ticTacToeBoard { width: 240px; height: 240px; }
+    #memory-grid { max-width: 320px; }
+    .simon-btn { width:120px; height:120px; }
+  }
 </style>
 </head>
 <body>
-<header>GAME HUB</header>
+<header>Game Hub</header>
 <main>
-<section id="menu" class="active">
-<div class="gamehub-menu">
-<button onclick="showSection('snake')">🐍 Snake</button>
-<button onclick="showSection('maze')">🌀 Maze</button>
-<button onclick="showSection('memory')">🧠 Memory Match</button>
-<button onclick="showSection('ticTacToe')">❌⭕ Tic Tac Toe</button>
-<button onclick="showSection('numberGuess')">🎲 Number Guess</button>
-<button onclick="showSection('rockPaperScissors')">✊🖐✌ Rock Paper Scissors</button>
-<button onclick="showSection('whackAMole')">🔨 Whack-a-Mole</button>
-<button onclick="showSection('simonSays')">🎵 Simon Says</button>
-</div>
-</section>
+  <!-- Main Menu -->
+  <section id="menu" class="active">
+    <div class="gamehub-menu" role="list" aria-label="Available games">
+      <button role="listitem" data-target="snake">🐍 Snake</button>
+      <button role="listitem" data-target="maze">🌀 Maze (10 Levels)</button>
+      <button role="listitem" data-target="memory">🧠 Memory Match (10 Levels)</button>
+      <button role="listitem" data-target="ticTacToe">❌⭕ Tic Tac Toe</button>
+      <button role="listitem" data-target="numberGuess">🎲 Number Guess</button>
+      <button role="listitem" data-target="rockPaperScissors">✊📄✂️ Rock Paper Scissors</button>
+      <button role="listitem" data-target="whackAMole">🔨 Whack-a-Mole</button>
+      <button role="listitem" data-target="simonSays">🎵 Simon Says</button>
+    </div>
+  </section>
 
-<!-- ORIGINAL GAME SECTIONS HERE -->
-<section id="snake"><div class="game-content"><h2>Snake</h2><canvas id="snakeCanvas" width="300" height="300"></canvas><div id="snakeScore">Score: 0</div><button onclick="startSnake()">Start Game</button><button class="back-btn" onclick="backToMenu()">Back</button></div></section>
-<section id="maze"><div class="game-content"><h2>Maze</h2><canvas id="mazeCanvas" width="400" height="400"></canvas><button onclick="startMaze()">Start Maze</button><button class="back-btn" onclick="backToMenu()">Back</button></div></section>
-<section id="memory"><div class="game-content"><h2>Memory Match</h2><div id="memory-grid"></div><button class="back-btn" onclick="backToMenu()">Back</button></div></section>
-<section id="ticTacToe"><div class="game-content"><h2>Tic Tac Toe</h2><table id="ticTacToeBoard"></table><div id="tttMsg"></div><button onclick="startTicTacToe()">Restart</button><button class="back-btn" onclick="backToMenu()">Back</button></div></section>
-<section id="numberGuess"><div class="game-content"><h2>Number Guess</h2><input type="number" id="maxNumberInput" /><button onclick="startNumberGuess()">Start</button><div id="numberGuessMsg"></div><button class="back-btn" onclick="backToMenu()">Back</button></div></section>
+  <!-- SNAKE -->
+  <section id="snake" aria-label="Snake game" tabindex="0">
+    <div class="game-content">
+      <h2>Snake</h2>
+      <canvas id="snakeCanvas" width="300" height="300" tabindex="0" aria-label="Snake game board"></canvas>
+      <div id="snakeScore">Score: 0</div>
+      <button id="snakeStartBtn">Start Game</button>
+      <button class="back-btn">Back to Game Hub</button>
+    </div>
+  </section>
 
-<!-- NEW GAMES -->
-<section id="rockPaperScissors"><div class="game-content"><h2>Rock Paper Scissors</h2><button onclick="playRPS('rock')">✊ Rock</button><button onclick="playRPS('paper')">🖐 Paper</button><button onclick="playRPS('scissors')">✌ Scissors</button><div id="rpsResult" style="margin-top:15px;font-weight:bold;color:#ffd500;"></div><button class="back-btn" onclick="backToMenu()">Back</button></div></section>
-<section id="whackAMole"><div class="game-content"><h2>Whack-a-Mole</h2><canvas id="whackCanvas" width="300" height="300"></canvas><button onclick="startWhackAMole()">Start</button><div id="whackScore">Score: 0</div><button class="back-btn" onclick="backToMenu()">Back</button></div></section>
-<section id="simonSays"><div class="game-content"><h2>Simon Says</h2><button onclick="startSimonSays()">Start Game</button><div id="simonSequence" style="margin-top:15px;font-weight:bold;color:#ffd500;"></div><button class="back-btn" onclick="backToMenu()">Back</button></div></section>
+  <!-- MAZE -->
+  <section id="maze" aria-label="Maze game" tabindex="0">
+    <div class="game-content">
+      <h2>Maze</h2>
+      <label for="mazeLevel">Choose Level (1-10): </label>
+      <input id="mazeLevel" type="number" min="1" max="10" value="1" style="width:50px; text-align:center" />
+      <button id="mazeStartBtn">Start Maze</button>
+      <canvas id="mazeCanvas" width="400" height="400" tabindex="0" aria-label="Maze game board"></canvas>
+      <div id="maze-result" style="margin-top:15px; font-weight:bold; color:#7FFFD4;"></div>
+      <button class="back-btn">Back to Game Hub</button>
+    </div>
+  </section>
+
+  <!-- MEMORY MATCH -->
+  <section id="memory" aria-label="Memory match game" tabindex="0">
+    <div class="game-content">
+      <h2>Memory Match</h2>
+      <label for="memoryLevel">Choose Level (1-10): </label>
+      <input id="memoryLevel" type="number" min="1" max="10" value="1" style="width:50px; text-align:center" />
+      <button id="memoryStartBtn">Start Level</button>
+      <div id="memory-result"></div>
+      <div id="memory-grid" role="grid"></div>
+      <button class="back-btn">Back to Game Hub</button>
+    </div>
+  </section>
+
+  <!-- TIC TAC TOE -->
+  <section id="ticTacToe" aria-label="Tic Tac Toe game" tabindex="0">
+    <div class="game-content">
+      <h2>Tic Tac Toe</h2>
+      <div style="margin-bottom: 15px;">
+        <label><input type="radio" name="tttMode" value="human" checked> Player vs Player</label>
+        <label style="margin-left: 20px;"><input type="radio" name="tttMode" value="ai"> Player vs Robot</label>
+      </div>
+      <table id="ticTacToeBoard" role="grid" aria-label="Tic Tac Toe board" tabindex="0">
+        <tbody>
+          <tr>
+            <td data-cell="0" role="gridcell" aria-label="Row 1, Column 1" tabindex="0"></td>
+            <td data-cell="1" role="gridcell" aria-label="Row 1, Column 2" tabindex="0"></td>
+            <td data-cell="2" role="gridcell" aria-label="Row 1, Column 3" tabindex="0"></td>
+          </tr>
+          <tr>
+            <td data-cell="3" role="gridcell" aria-label="Row 2, Column 1" tabindex="0"></td>
+            <td data-cell="4" role="gridcell" aria-label="Row 2, Column 2" tabindex="0"></td>
+            <td data-cell="5" role="gridcell" aria-label="Row 2, Column 3" tabindex="0"></td>
+          </tr>
+          <tr>
+            <td data-cell="6" role="gridcell" aria-label="Row 3, Column 1" tabindex="0"></td>
+            <td data-cell="7" role="gridcell" aria-label="Row 3, Column 2" tabindex="0"></td>
+            <td data-cell="8" role="gridcell" aria-label="Row 3, Column 3" tabindex="0"></td>
+          </tr>
+        </tbody>
+      </table>
+      <div id="tttMsg" style="margin-top:15px; font-weight:bold; color:#f1c40f;"></div>
+      <button id="tttRestartBtn">Restart</button>
+      <button class="back-btn">Back to Game Hub</button>
+    </div>
+  </section>
+
+  <!-- NUMBER GUESS -->
+  <section id="numberGuess" aria-label="Number guessing game" tabindex="0">
+    <div class="game-content">
+      <h2>Number Guess</h2>
+      <div>
+        <label for="maxNumberInput">Maximum Number: </label>
+        <input id="maxNumberInput" type="number" min="10" max="10000" value="100" style="width:80px; text-align:center" />
+      </div>
+      <button id="numberStartBtn">Start Game</button>
+      <div id="numberGuessGame" style="margin-top:15px; display:none;">
+        <input id="numberGuessInput" type="number" placeholder="Enter your guess" />
+        <button id="numberGuessBtn">Guess</button>
+        <div id="numberGuessMsg"></div>
+        <div id="numberGuessAttempts"></div>
+        <button id="numberRestartBtn">Restart Game</button>
+      </div>
+      <button class="back-btn">Back to Game Hub</button>
+    </div>
+  </section>
+
+  <!-- ROCK PAPER SCISSORS -->
+  <section id="rockPaperScissors" aria-label="Rock Paper Scissors game" tabindex="0">
+    <div class="game-content">
+      <h2>Rock Paper Scissors</h2>
+      <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
+        <button data-rps="rock">✊ Rock</button>
+        <button data-rps="paper">📄 Paper</button>
+        <button data-rps="scissors">✂️ Scissors</button>
+      </div>
+      <div id="rpsResult" style="margin-top:15px; font-weight:bold; color:#ffd500;"></div>
+      <button class="back-btn">Back to Game Hub</button>
+    </div>
+  </section>
+
+  <!-- WHACK A MOLE -->
+  <section id="whackAMole" aria-label="Whack a Mole game" tabindex="0">
+    <div class="game-content">
+      <h2>Whack-a-Mole</h2>
+      <div id="moleGrid" class="mole-grid" aria-label="Whack-a-mole grid"></div>
+      <div id="moleScore" style="margin-top:10px; font-weight:bold; color:#ffd500;">Score: 0</div>
+      <div style="margin-top:12px;"><button id="moleStartBtn">Start Game</button><button id="moleStopBtn">Stop</button></div>
+      <button class="back-btn">Back to Game Hub</button>
+    </div>
+  </section>
+
+  <!-- SIMON SAYS -->
+  <section id="simonSays" aria-label="Simon Says game" tabindex="0">
+    <div class="game-content">
+      <h2>Simon Says</h2>
+      <div class="simon-grid" id="simonButtons"></div>
+      <div id="simonMsg" style="margin-top:12px; font-weight:bold; color:#ffd500;"></div>
+      <div style="margin-top:12px;"><button id="simonStartBtn">Start Game</button><button id="simonStopBtn">Stop</button></div>
+      <button class="back-btn">Back to Game Hub</button>
+    </div>
+  </section>
+
 </main>
 <footer>© DaBaconKid</footer>
+
 <script>
-function showSection(id){document.querySelectorAll("main section").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");}
-function backToMenu(){document.querySelectorAll("main section").forEach(s=>s.classList.remove("active"));document.getElementById("menu").classList.add("active");}
+/* ---------- Utility: show/hide sections ---------- */
+function showSection(id) {
+  document.querySelectorAll('main section').forEach(sec => sec.classList.toggle('active', sec.id === id));
+  const sec = document.getElementById(id);
+  if (!sec) return;
+  const focusEl = sec.querySelector('button, input, canvas, [tabindex]');
+  if (focusEl) focusEl.focus();
+}
 
-// SIMPLE RPS GAME
-function playRPS(choice){let options=["rock","paper","scissors"],comp=options[Math.floor(Math.random()*3)],result="";if(choice===comp)result="Tie!";else if((choice==="rock"&&comp==="scissors")||(choice==="paper"&&comp==="rock")||(choice==="scissors"&&comp==="paper"))result="You win!";else result="You lose!";document.getElementById("rpsResult").textContent=`You chose ${choice}, Computer chose ${comp}. ${result}`;}
+/* Wire main menu buttons */
+document.querySelectorAll('.gamehub-menu button[data-target]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.target;
+    showSection(target);
+    // auto-start sensible games for convenience
+    if (target === 'snake') startSnake();
+    if (target === 'memory') setupMemory();
+    if (target === 'ticTacToe') startTicTacToe();
+  });
+});
 
-// WHACK-A-MOLE (basic)
-let whackScore=0,whackInterval;
-function startWhackAMole(){whackScore=0;let canvas=document.getElementById("whackCanvas"),ctx=canvas.getContext("2d");clearInterval(whackInterval);whackInterval=setInterval(()=>{ctx.fillStyle="#111";ctx.fillRect(0,0,300,300);let x=Math.random()*260,y=Math.random()*260;ctx.fillStyle="#FF6347";ctx.fillRect(x,y,40,40);canvas.onclick=function(e){let rect=canvas.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top;if(mx>x&&mx<x+40&&my>y&&my<y+40){whackScore++;document.getElementById("whackScore").textContent="Score: "+whackScore;}}},1000);}
+/* Back buttons */
+document.querySelectorAll('.back-btn').forEach(btn => btn.addEventListener('click', () => { stopAllGames(); showSection('menu'); }));
 
-// SIMON SAYS (basic)
-let simonSeq=[];function startSimonSays(){simonSeq=[];let colors=["red","green","blue","yellow"],seq=document.getElementById("simonSequence");for(let i=0;i<5;i++)simonSeq.push(colors[Math.floor(Math.random()*colors.length)]);seq.textContent="Sequence: "+simonSeq.join(", ");}
+function stopAllGames() {
+  stopSnake(); stopMaze(); resetMemorySelection(); stopTicTacToe(); resetNumberGuess(); stopWhackAMole(); stopSimonSays();
+}
 
+/* ================= SNAKE ================= */
+const snakeCanvas = document.getElementById('snakeCanvas');
+const snakeCtx = snakeCanvas.getContext('2d');
+const SCALE = 15;
+let snakeRows = Math.floor(snakeCanvas.height / SCALE);
+let snakeCols = Math.floor(snakeCanvas.width / SCALE);
+let snake = [];
+let food = null; let snakeScore = 0; let snakeInterval = null; let snakeDir = {x:0,y:0}; let snakeNextDir = {x:0,y:0}; let snakeRunning = false;
+class Seg { constructor(x,y){ this.x=x; this.y=y; } }
+function initSnakeGrid() { snakeRows = Math.floor(snakeCanvas.height / SCALE); snakeCols = Math.floor(snakeCanvas.width / SCALE); }
+function startSnake(){ if(snakeRunning) return; initSnakeGrid(); snake=[new Seg(Math.floor(snakeCols/2), Math.floor(snakeRows/2))]; snakeDir={x:0,y:0}; snakeNextDir={x:0,y:0}; snakeScore=0; document.getElementById('snakeScore').textContent='Score: 0'; placeFood(); snakeRunning=true; snakeInterval=setInterval(snakeLoop,100); snakeCanvas.focus(); }
+function stopSnake(){ clearInterval(snakeInterval); snakeRunning=false; }
+function placeFood(){ initSnakeGrid(); let x,y; do{ x=Math.floor(Math.random()*snakeCols); y=Math.floor(Math.random()*snakeRows);} while(snake.some(s=>s.x===x && s.y===y)); food=new Seg(x,y); }
+function snakeLoop(){ snakeDir = snakeNextDir; drawSnake(); drawFood(); if (snakeDir.x===0 && snakeDir.y===0) return; const head=snake[0]; let nx=head.x+snakeDir.x, ny=head.y+snakeDir.y; if(nx<0) nx = snakeCols-1; else if(nx>=snakeCols) nx=0; if(ny<0) ny=snakeRows-1; else if(ny>=snakeRows) ny=0; if (snake.some(s=>s.x===nx && s.y===ny)){ stopSnake(); alert('Game Over! Your score: ' + snakeScore); return; } snake.unshift(new Seg(nx,ny)); if (food && nx===food.x && ny===food.y){ snakeScore++; document.getElementById('snakeScore').textContent='Score: '+snakeScore; placeFood(); } else snake.pop(); drawSnake(); drawFood(); }
+function drawSnake(){ snakeCtx.fillStyle='#111'; snakeCtx.fillRect(0,0,snakeCanvas.width,snakeCanvas.height); snakeCtx.fillStyle='#7CFC00'; snake.forEach(s=> snakeCtx.fillRect(s.x*SCALE, s.y*SCALE, SCALE-1, SCALE-1)); }
+function drawFood(){ if(!food) return; snakeCtx.fillStyle='#FF4500'; snakeCtx.fillRect(food.x*SCALE, food.y*SCALE, SCALE-1, SCALE-1); }
+document.getElementById('snakeStartBtn').addEventListener('click', startSnake);
+
+/* Keyboard controls for snake & maze */
+window.addEventListener('keydown', e => {
+  // don't capture keys when typing
+  const active = document.activeElement; if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
+  if (snakeRunning) {
+    if (e.key === 'ArrowUp' && snakeDir.y !== 1) snakeNextDir = {x:0,y:-1};
+    else if (e.key === 'ArrowDown' && snakeDir.y !== -1) snakeNextDir = {x:0,y:1};
+    else if (e.key === 'ArrowLeft' && snakeDir.x !== 1) snakeNextDir = {x:-1,y:0};
+    else if (e.key === 'ArrowRight' && snakeDir.x !== -1) snakeNextDir = {x:1,y:0};
+  }
+  if (mazeActive) {
+    if (e.key === 'ArrowUp') { moveMazePlayer(-1,0); e.preventDefault(); }
+    else if (e.key === 'ArrowDown') { moveMazePlayer(1,0); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft') { moveMazePlayer(0,-1); e.preventDefault(); }
+    else if (e.key === 'ArrowRight') { moveMazePlayer(0,1); e.preventDefault(); }
+  }
+});
+
+/* ================= MAZE ================= */
+const mazeCanvas = document.getElementById('mazeCanvas');
+const mazeCtx = mazeCanvas.getContext('2d');
+const mazeCellSize = 40; let maze=null, mazeRows=0, mazeCols=0, mazePlayer={r:0,c:0}, mazeLevel=1, mazeActive=false;
+class MazeCell{ constructor(r,c){ this.r=r; this.c=c; this.visited=false; this.walls=[true,true,true,true]; }}
+function generateMaze(rows,cols){ let grid=[]; for(let r=0;r<rows;r++){ let row=[]; for(let c=0;c<cols;c++) row.push(new MazeCell(r,c)); grid.push(row); } let stack=[]; let current=grid[0][0]; current.visited=true; let total=rows*cols, visited=1; const neighbors = (cell)=>{ let n=[]; let {r,c}=cell; if(r>0 && !grid[r-1][c].visited) n.push(grid[r-1][c]); if(c<cols-1 && !grid[r][c+1].visited) n.push(grid[r][c+1]); if(r<rows-1 && !grid[r+1][c].visited) n.push(grid[r+1][c]); if(c>0 && !grid[r][c-1].visited) n.push(grid[r][c-1]); return n; };
+  const removeWalls=(a,b)=>{ let x=a.c-b.c; if(x===1){ a.walls[3]=false; b.walls[1]=false; } else if(x===-1){ a.walls[1]=false; b.walls[3]=false; } let y=a.r-b.r; if(y===1){ a.walls[0]=false; b.walls[2]=false; } else if(y===-1){ a.walls[2]=false; b.walls[0]=false; }};
+  while(visited<total){ let nbs = neighbors(current); if(nbs.length){ let next = nbs[Math.floor(Math.random()*nbs.length)]; stack.push(current); removeWalls(current,next); current=next; current.visited=true; visited++; } else if(stack.length>0){ current=stack.pop(); }} return grid; }
+function drawMaze(){ if(!maze) return; mazeCtx.clearRect(0,0,mazeCanvas.width,mazeCanvas.height); mazeCtx.fillStyle='#111'; mazeCtx.fillRect(0,0,mazeCanvas.width,mazeCanvas.height); mazeCtx.strokeStyle='#7FFFD4'; mazeCtx.lineWidth=4; maze.forEach(row=>row.forEach(cell=>{ const x = cell.c * mazeCellSize; const y = cell.r * mazeCellSize; if(cell.walls[0]){ mazeCtx.beginPath(); mazeCtx.moveTo(x,y); mazeCtx.lineTo(x+mazeCellSize,y); mazeCtx.stroke(); } if(cell.walls[1]){ mazeCtx.beginPath(); mazeCtx.moveTo(x+mazeCellSize,y); mazeCtx.lineTo(x+mazeCellSize,y+mazeCellSize); mazeCtx.stroke(); } if(cell.walls[2]){ mazeCtx.beginPath(); mazeCtx.moveTo(x+mazeCellSize,y+mazeCellSize); mazeCtx.lineTo(x,y+mazeCellSize); mazeCtx.stroke(); } if(cell.walls[3]){ mazeCtx.beginPath(); mazeCtx.moveTo(x,y+mazeCellSize); mazeCtx.lineTo(x,y); mazeCtx.stroke(); } }));
+  // draw player & exit
+  mazeCtx.fillStyle='#7FFFD4'; mazeCtx.fillRect(mazePlayer.c*mazeCellSize+8, mazePlayer.r*mazeCellSize+8, mazeCellSize-16, mazeCellSize-16);
+  mazeCtx.fillStyle='#FF6347'; mazeCtx.fillRect((mazeCols-1)*mazeCellSize+8, (mazeRows-1)*mazeCellSize+8, mazeCellSize-16, mazeCellSize-16);
+}
+function startMaze(){ let lvl = parseInt(document.getElementById('mazeLevel').value); if(isNaN(lvl)||lvl<1) lvl=1; else if(lvl>10) lvl=10; mazeLevel=lvl; mazeRows = mazeCols = 5 + mazeLevel; const reqW = mazeCols * mazeCellSize; const reqH = mazeRows * mazeCellSize; if(mazeCanvas.width !== reqW || mazeCanvas.height !== reqH){ mazeCanvas.width = reqW; mazeCanvas.height = reqH; } maze = generateMaze(mazeRows, mazeCols); mazePlayer = {r:0,c:0}; mazeActive = true; drawMaze(); document.getElementById('maze-result').textContent=''; mazeCanvas.focus(); }
+function stopMaze(){ mazeActive = false; }
+function moveMazePlayer(dr,dc){ if(!mazeActive) return; let r=mazePlayer.r, c=mazePlayer.c; let cell = maze[r][c]; if(dr===-1 && !cell.walls[0]) r--; else if(dr===1 && !cell.walls[2]) r++; else if(dc===-1 && !cell.walls[3]) c--; else if(dc===1 && !cell.walls[1]) c++; else return; if(r>=0 && r<mazeRows && c>=0 && c<mazeCols){ mazePlayer={r,c}; drawMaze(); if(r===mazeRows-1 && c===mazeCols-1){ mazeActive=false; document.getElementById('maze-result').textContent = `🎉 Completed Level ${mazeLevel}!`; } } }
+document.getElementById('mazeStartBtn').addEventListener('click', startMaze);
+
+/* ================= MEMORY MATCH ================= */
+const fruitsList = ["🍎","🍌","🍇","🍒","🍍","🥝","🍑","🍉","🍓","🥭","🍐","🍋","🥥","🍊","🍈","🥑","🍏","🍅","🍆","🥕"];
+let memoryGrid = document.getElementById('memory-grid'); let memoryLevelInput = document.getElementById('memoryLevel'); let memoryResult = document.getElementById('memory-result');
+let memoryCards = [], memoryFlipped = [], memoryMatched = 0, memoryBusy = false, memoryLevel = 1;
+function shuffle(arr){ let a = arr.slice(); for(let i=a.length-1;i>0;i--){ let j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function setupMemory(){ memoryLevel = parseInt(memoryLevelInput.value); if(isNaN(memoryLevel)||memoryLevel<1) memoryLevel=1; else if(memoryLevel>10) memoryLevel=10; let pairs = 3 + memoryLevel; if(pairs>fruitsList.length) pairs = fruitsList.length; const cards = shuffle(fruitsList).slice(0,pairs); memoryCards = shuffle(cards.concat(cards)); let total = memoryCards.length; let cols = Math.ceil(Math.sqrt(total)); let rows = Math.ceil(total/cols); memoryGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`; memoryGrid.innerHTML=''; memoryFlipped=[]; memoryMatched=0; memoryBusy=false; memoryResult.textContent=''; memoryCards.forEach((f,i)=>{ let btn = document.createElement('button'); btn.textContent=''; btn.setAttribute('aria-label','Memory card'); btn.dataset.index = i; btn.addEventListener('click', memoryCardClicked); memoryGrid.appendChild(btn); }); }
+function resetMemorySelection(){ memoryGrid.innerHTML=''; memoryResult.textContent=''; }
+function memoryCardClicked(e){ if(memoryBusy) return; const btn = e.currentTarget; const idx = parseInt(btn.dataset.index); if(memoryFlipped.includes(idx)) return; btn.textContent = memoryCards[idx]; memoryFlipped.push(idx); if(memoryFlipped.length===2){ memoryBusy=true; const [i1,i2] = memoryFlipped; if(memoryCards[i1] === memoryCards[i2]){ memoryMatched++; setTimeout(()=>{ [i1,i2].forEach(i=>{ let b = memoryGrid.querySelector(`button[data-index='${i}']`); if(b){ b.disabled=true; b.style.backgroundColor='#7FFFD4'; b.style.color='#004d40'; b.style.cursor='default'; } }); memoryFlipped=[]; memoryBusy=false; if(memoryMatched === memoryCards.length/2) memoryResult.textContent = `🎉 Level ${memoryLevel} Completed!`; }, 400); } else { setTimeout(()=>{ [i1,i2].forEach(i=>{ let b = memoryGrid.querySelector(`button[data-index='${i}']`); if(b) b.textContent=''; }); memoryFlipped=[]; memoryBusy=false; }, 700); } } }
+document.getElementById('memoryStartBtn').addEventListener('click', setupMemory);
+
+/* ================= TIC TAC TOE ================= */
+let tttBoard = Array(9).fill(null); let tttTurn = 'X'; let tttGameOver = false; let tttIsAI = false; const tttCells = document.querySelectorAll('#ticTacToeBoard td'); const tttMsg = document.getElementById('tttMsg');
+function startTicTacToe(){ tttBoard.fill(null); tttTurn='X'; tttGameOver=false; tttMsg.textContent = 'Turn: Player ' + tttTurn; tttCells.forEach(cell=>{ cell.textContent=''; cell.classList.remove('taken'); cell.style.backgroundColor=''; cell.addEventListener('click', tttCellClick); }); tttIsAI = document.querySelector('input[name="tttMode"]:checked').value === 'ai'; if(tttIsAI && tttTurn==='O') aiMove(); }
+function stopTicTacToe(){ tttCells.forEach(cell=>cell.removeEventListener('click', tttCellClick)); tttGameOver=true; }
+function tttCellClick(e){ const cell = e.currentTarget; let index = parseInt(cell.dataset.cell); if(tttGameOver || tttBoard[index] !== null) return; if(tttIsAI && tttTurn === 'O') return; makeMove(index); }
+function makeMove(index){ if(tttBoard[index] !== null) return; tttBoard[index] = tttTurn; tttCells[index].textContent = tttTurn; tttCells[index].classList.add('taken'); if(checkWin(tttTurn)){ tttMsg.textContent = `Player ${tttTurn} wins! 🎉`; tttGameOver = true; stopTicTacToe(); return; } else if(tttBoard.every(c=>c!==null)){ tttMsg.textContent = "It's a tie!"; tttGameOver = true; stopTicTacToe(); return; } tttTurn = tttTurn === 'X' ? 'O' : 'X'; tttMsg.textContent = 'Turn: Player ' + tttTurn; if(tttIsAI && tttTurn === 'O') aiMove(); }
+function checkWin(player){ const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; return wins.some(combo => combo.every(i => tttBoard[i] === player)); }
+function aiMove(){ if(tttGameOver) return; let available = tttBoard.map((v,i)=> v===null ? i : -1).filter(i=>i!==-1); if(available.length===0) return; let choice = available[Math.floor(Math.random()*available.length)]; setTimeout(()=>makeMove(choice), 300); }
+document.getElementById('tttRestartBtn').addEventListener('click', startTicTacToe);
+
+/* ================= NUMBER GUESS ================= */
+let guessMax = 100; let guessNumber = 0; let guessAttemptsLeft = 5; const maxNumberInput = document.getElementById('maxNumberInput'); const numberGuessGameDiv = document.getElementById('numberGuessGame'); const numberGuessInput = document.getElementById('numberGuessInput'); const numberGuessBtn = document.getElementById('numberGuessBtn'); const numberGuessMsg = document.getElementById('numberGuessMsg'); const numberGuessAttempts = document.getElementById('numberGuessAttempts');
+function startNumberGuess(){ let max = parseInt(maxNumberInput.value); if(isNaN(max) || max < 10) max = 100; guessMax = max; guessNumber = Math.floor(Math.random() * guessMax) + 1; guessAttemptsLeft = 5; numberGuessMsg.textContent = `Guess a number between 1 and ${guessMax}. You have ${guessAttemptsLeft} attempts.`; numberGuessAttempts.textContent = `Attempts left: ${guessAttemptsLeft}`; numberGuessInput.value = ''; numberGuessInput.disabled = false; numberGuessBtn.disabled = false; numberGuessGameDiv.style.display = 'block'; numberGuessInput.focus(); }
+function submitNumberGuess(){ let val = parseInt(numberGuessInput.value); if(isNaN(val) || val < 1 || val > guessMax){ alert(`Please enter a number between 1 and ${guessMax}`); return; } guessAttemptsLeft--; if(val === guessNumber){ numberGuessMsg.textContent = `🎉 You guessed it! The number was ${guessNumber}.`; numberGuessAttempts.textContent = `Attempts left: ${guessAttemptsLeft}`; numberGuessInput.disabled = true; numberGuessBtn.disabled = true; } else if(guessAttemptsLeft === 0){ numberGuessMsg.textContent = `❌ No attempts left! The number was ${guessNumber}. Restarting...`; numberGuessAttempts.textContent = `Attempts left: 0`; numberGuessInput.disabled = true; numberGuessBtn.disabled = true; setTimeout(startNumberGuess, 1200); } else { let hint = val > guessNumber ? 'lower' : 'higher'; numberGuessMsg.textContent = `Try ${hint}!`; numberGuessAttempts.textContent = `Attempts left: ${guessAttemptsLeft}`; } }
+function resetNumberGuess(){ numberGuessGameDiv.style.display = 'none'; numberGuessMsg.textContent = ''; numberGuessAttempts.textContent = ''; numberGuessInput.value = ''; numberGuessInput.disabled = false; numberGuessBtn.disabled = false; }
+document.getElementById('numberStartBtn').addEventListener('click', startNumberGuess); document.getElementById('numberGuessBtn').addEventListener('click', submitNumberGuess); document.getElementById('numberRestartBtn').addEventListener('click', startNumberGuess);
+
+/* ================= ROCK PAPER SCISSORS ================= */
+document.querySelectorAll('[data-rps]').forEach(btn => btn.addEventListener('click', ()=>{ const user = btn.dataset.rps; const opts = ['rock','paper','scissors']; const ai = opts[Math.floor(Math.random()*3)]; let res = ''; if(user===ai) res = "It's a tie!"; else if((user==='rock'&&ai==='scissors')||(user==='paper'&&ai==='rock')||(user==='scissors'&&ai==='paper')) res = 'You win!'; else res = 'You lose!'; document.getElementById('rpsResult').textContent = `You: ${user} — AI: ${ai} — ${res}`; }));
+
+/* ================= WHACK A MOLE ================= */
+let moleInterval = null; let moleScore = 0; const moleGridEl = document.getElementById('moleGrid'); const moleScoreEl = document.getElementById('moleScore');
+function createMoleGrid(){ moleGridEl.innerHTML = ''; for(let i=0;i<9;i++){ const b = document.createElement('button'); b.dataset.index = i; b.addEventListener('click', ()=>{ if(b.classList.contains('mole')){ moleScore++; moleScoreEl.textContent = 'Score: ' + moleScore; b.classList.remove('mole'); b.textContent = ''; } }); moleGridEl.appendChild(b); } }
+function startWhackAMole(){ stopWhackAMole(); moleScore = 0; moleScoreEl.textContent = 'Score: 0'; createMoleGrid(); moleInterval = setInterval(()=>{ moleGridEl.querySelectorAll('button').forEach(b=>{ b.classList.remove('mole'); b.textContent = ''; }); const idx = Math.floor(Math.random()*9); const btn = moleGridEl.children[idx]; btn.classList.add('mole'); btn.textContent = '🐹'; }, 800); }
+function stopWhackAMole(){ clearInterval(moleInterval); moleInterval = null; moleGridEl.querySelectorAll('button').forEach(b=>{ b.classList.remove('mole'); b.textContent = ''; }); }
+createMoleGrid(); document.getElementById('moleStartBtn').addEventListener('click', startWhackAMole); document.getElementById('moleStopBtn').addEventListener('click', stopWhackAMole);
+
+/* ================= SIMON SAYS ================= */
+const simonButtonsEl = document.getElementById('simonButtons'); const simonMsg = document.getElementById('simonMsg'); let simonSequence = [], simonUser = [], simonLevel = 0, simonPlaying = false;
+const simonColors = [ {name:'red', label:'🔴'}, {name:'green', label:'🟢'}, {name:'blue', label:'🔵'}, {name:'yellow', label:'🟡'} ];
+function buildSimonButtons(){ simonButtonsEl.innerHTML = ''; simonColors.forEach((c,idx)=>{ const b = document.createElement('button'); b.className = 'simon-btn'; b.style.background = c.name; b.dataset.color = c.name; b.innerHTML = `<div style="font-size:1.2rem;color:#fff;">${c.label}</div>`; b.addEventListener('click', ()=> { if(!simonPlaying) return; simonUser.push(c.name); animateSimonButton(b); checkSimonInput(); }); simonButtonsEl.appendChild(b); }); }
+function animateSimonButton(btn){ btn.classList.add('simon-active'); setTimeout(()=>btn.classList.remove('simon-active'), 280); }
+function startSimonSays(){ stopSimonSays(); simonSequence = []; simonUser = []; simonLevel = 0; simonPlaying = true; buildSimonButtons(); nextSimonLevel(); }
+function stopSimonSays(){ simonPlaying = false; simonMsg.textContent = ''; }
+function nextSimonLevel(){ simonLevel++; simonUser=[]; const choice = simonColors[Math.floor(Math.random()*simonColors.length)].name; simonSequence.push(choice); playSimonSequence(); }
+function playSimonSequence(){ simonMsg.textContent = `Watch — Level ${simonLevel}`; let i=0; const buttons = Array.from(simonButtonsEl.children); const interval = setInterval(()=>{ if(i>=simonSequence.length){ clearInterval(interval); simonMsg.textContent = `Your turn — repeat the ${simonSequence.length} steps`; return; } const name = simonSequence[i]; const btn = buttons.find(b=>b.dataset.color===name); animateSimonButton(btn); i++; }, 600); }
+function checkSimonInput(){ const idx = simonUser.length - 1; if(simonUser[idx] !== simonSequence[idx]){ simonMsg.textContent = `Wrong! Game over at level ${simonLevel}`; simonPlaying = false; return; } if(simonUser.length === simonSequence.length){ simonMsg.textContent = 'Correct! Next level...'; setTimeout(nextSimonLevel, 700); } }
+buildSimonButtons(); document.getElementById('simonStartBtn').addEventListener('click', startSimonSays); document.getElementById('simonStopBtn').addEventListener('click', stopSimonSays);
+
+/* Initial UI */
+showSection('menu');
 </script>
 </body>
 </html>
