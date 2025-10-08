@@ -2,150 +2,71 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Game Hub</title>
 <style>
-/* ... existing CSS from your original code ... */
+/* KEEP ORIGINAL STYLE FROM YOUR CODE */
+* { box-sizing: border-box; }
+body { margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg,#292E49 0%,#536976 100%); color:white; min-height:100vh; display:flex; flex-direction:column; }
+header { background:#1F2235; padding:15px 20px; text-align:center; font-size:2rem; font-weight:700; letter-spacing:2px; user-select:none; text-shadow:1px 1px 3px #000000aa; }
+main { flex-grow:1; padding:20px; }
+footer { text-align:center; padding:12px; font-size:0.9rem; background:#1F2235; user-select:none; }
+button { cursor:pointer; background:#536976; border:none; color:white; padding:12px 20px; font-size:1.1rem; border-radius:10px; margin:10px 15px; box-shadow:0 4px 8px rgba(83,105,118,.4); transition:all .25s ease; }
+button:hover { background:#6D8A9F; }
+.back-btn { background:#ff6f61; }
+.gamehub-menu { display:flex; flex-wrap:wrap; justify-content:center; max-width:800px; margin:0 auto; }
+main section { display:none; }
+main section.active { display:block; }
+.game-content { max-width:480px; margin:0 auto; text-align:center; }
+canvas { background:#111; border-radius:12px; margin-top:15px; }
+#ticTacToeBoard td { border:3px solid #536976; text-align:center; vertical-align:middle; font-size:3rem; cursor:pointer; }
+#memory-grid { display:grid; gap:10px; margin:20px auto; max-width:480px; }
+#memory-grid button { background:#1f2937; border-radius:10px; font-size:2.4rem; line-height:1; padding:18px 0; }
 </style>
 </head>
 <body>
 <header>GAME HUB</header>
 <main>
-  <!-- Main Menu -->
-  <section id="menu" class="active">
-    <div class="gamehub-menu" role="list" aria-label="Available games">
-      <button onclick="showSection('snake')">🐍 Snake</button>
-      <button onclick="showSection('maze')">🌀 Maze (10 Levels)</button>
-      <button onclick="showSection('memory')">🧠 Memory Match (10 Levels)</button>
-      <button onclick="showSection('ticTacToe')">❌⭕ Tic Tac Toe</button>
-      <button onclick="showSection('numberGuess')">🎲 Number Guess</button>
-      <button onclick="showSection('rockPaperScissors')">✊📄✂️ Rock Paper Scissors</button>
-      <button onclick="showSection('whackAMole')">🐹 Whack-a-Mole</button>
-      <button onclick="showSection('simonSays')">🎵 Simon Says</button>
-    </div>
-  </section>
+<section id="menu" class="active">
+<div class="gamehub-menu">
+<button onclick="showSection('snake')">🐍 Snake</button>
+<button onclick="showSection('maze')">🌀 Maze</button>
+<button onclick="showSection('memory')">🧠 Memory Match</button>
+<button onclick="showSection('ticTacToe')">❌⭕ Tic Tac Toe</button>
+<button onclick="showSection('numberGuess')">🎲 Number Guess</button>
+<button onclick="showSection('rockPaperScissors')">✊🖐✌ Rock Paper Scissors</button>
+<button onclick="showSection('whackAMole')">🔨 Whack-a-Mole</button>
+<button onclick="showSection('simonSays')">🎵 Simon Says</button>
+</div>
+</section>
 
-  <!-- Snake, Maze, Memory Match, Tic Tac Toe, Number Guess sections here (from original) -->
+<!-- ORIGINAL GAME SECTIONS HERE -->
+<section id="snake"><div class="game-content"><h2>Snake</h2><canvas id="snakeCanvas" width="300" height="300"></canvas><div id="snakeScore">Score: 0</div><button onclick="startSnake()">Start Game</button><button class="back-btn" onclick="backToMenu()">Back</button></div></section>
+<section id="maze"><div class="game-content"><h2>Maze</h2><canvas id="mazeCanvas" width="400" height="400"></canvas><button onclick="startMaze()">Start Maze</button><button class="back-btn" onclick="backToMenu()">Back</button></div></section>
+<section id="memory"><div class="game-content"><h2>Memory Match</h2><div id="memory-grid"></div><button class="back-btn" onclick="backToMenu()">Back</button></div></section>
+<section id="ticTacToe"><div class="game-content"><h2>Tic Tac Toe</h2><table id="ticTacToeBoard"></table><div id="tttMsg"></div><button onclick="startTicTacToe()">Restart</button><button class="back-btn" onclick="backToMenu()">Back</button></div></section>
+<section id="numberGuess"><div class="game-content"><h2>Number Guess</h2><input type="number" id="maxNumberInput" /><button onclick="startNumberGuess()">Start</button><div id="numberGuessMsg"></div><button class="back-btn" onclick="backToMenu()">Back</button></div></section>
 
-  <!-- Rock Paper Scissors -->
-  <section id="rockPaperScissors" aria-label="Rock Paper Scissors game">
-    <div class="game-content">
-      <h2>Rock Paper Scissors</h2>
-      <button onclick="rpsPlay('rock')">✊ Rock</button>
-      <button onclick="rpsPlay('paper')">📄 Paper</button>
-      <button onclick="rpsPlay('scissors')">✂️ Scissors</button>
-      <div id="rpsResult" style="margin-top:15px; font-weight:bold;"></div>
-      <button class="back-btn" onclick="backToMenu()">Back to Game Hub</button>
-    </div>
-  </section>
-
-  <!-- Whack-a-Mole -->
-  <section id="whackAMole" aria-label="Whack a Mole game">
-    <div class="game-content">
-      <h2>Whack-a-Mole</h2>
-      <div id="moleGrid" style="display:grid; grid-template-columns: repeat(3, 100px); gap:10px; justify-content:center;"></div>
-      <div id="moleScore" style="margin-top:10px; font-weight:bold; color:#ffd500;">Score: 0</div>
-      <button onclick="startWhackAMole()">Start Game</button>
-      <button class="back-btn" onclick="backToMenu()">Back to Game Hub</button>
-    </div>
-  </section>
-
-  <!-- Simon Says -->
-  <section id="simonSays" aria-label="Simon Says game">
-    <div class="game-content">
-      <h2>Simon Says</h2>
-      <div id="simonButtons" style="display:grid; grid-template-columns: repeat(2, 120px); gap:10px; justify-content:center;"></div>
-      <div id="simonMsg" style="margin-top:15px; font-weight:bold;"></div>
-      <button onclick="startSimonSays()">Start Game</button>
-      <button class="back-btn" onclick="backToMenu()">Back to Game Hub</button>
-    </div>
-  </section>
+<!-- NEW GAMES -->
+<section id="rockPaperScissors"><div class="game-content"><h2>Rock Paper Scissors</h2><button onclick="playRPS('rock')">✊ Rock</button><button onclick="playRPS('paper')">🖐 Paper</button><button onclick="playRPS('scissors')">✌ Scissors</button><div id="rpsResult" style="margin-top:15px;font-weight:bold;color:#ffd500;"></div><button class="back-btn" onclick="backToMenu()">Back</button></div></section>
+<section id="whackAMole"><div class="game-content"><h2>Whack-a-Mole</h2><canvas id="whackCanvas" width="300" height="300"></canvas><button onclick="startWhackAMole()">Start</button><div id="whackScore">Score: 0</div><button class="back-btn" onclick="backToMenu()">Back</button></div></section>
+<section id="simonSays"><div class="game-content"><h2>Simon Says</h2><button onclick="startSimonSays()">Start Game</button><div id="simonSequence" style="margin-top:15px;font-weight:bold;color:#ffd500;"></div><button class="back-btn" onclick="backToMenu()">Back</button></div></section>
 </main>
 <footer>© DaBaconKid</footer>
 <script>
-// Existing game scripts here...
+function showSection(id){document.querySelectorAll("main section").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");}
+function backToMenu(){document.querySelectorAll("main section").forEach(s=>s.classList.remove("active"));document.getElementById("menu").classList.add("active");}
 
-// ROCK PAPER SCISSORS
-function rpsPlay(userChoice) {
-  const choices = ['rock', 'paper', 'scissors'];
-  const aiChoice = choices[Math.floor(Math.random() * choices.length)];
-  let result = '';
-  if(userChoice === aiChoice) result = "It's a tie!";
-  else if(
-    (userChoice === 'rock' && aiChoice === 'scissors') ||
-    (userChoice === 'paper' && aiChoice === 'rock') ||
-    (userChoice === 'scissors' && aiChoice === 'paper')
-  ) result = "You win!";
-  else result = "You lose!";
-  document.getElementById('rpsResult').textContent = `AI chose ${aiChoice}. ${result}`;
-}
+// SIMPLE RPS GAME
+function playRPS(choice){let options=["rock","paper","scissors"],comp=options[Math.floor(Math.random()*3)],result="";if(choice===comp)result="Tie!";else if((choice==="rock"&&comp==="scissors")||(choice==="paper"&&comp==="rock")||(choice==="scissors"&&comp==="paper"))result="You win!";else result="You lose!";document.getElementById("rpsResult").textContent=`You chose ${choice}, Computer chose ${comp}. ${result}`;}
 
-// WHACK-A-MOLE
-let moleScore = 0;
-let moleInterval;
-function startWhackAMole() {
-  moleScore = 0;
-  const moleGrid = document.getElementById('moleGrid');
-  moleGrid.innerHTML = '';
-  for(let i=0;i<9;i++) {
-    let btn = document.createElement('button');
-    btn.style.width='100px'; btn.style.height='100px';
-    btn.addEventListener('click', ()=>{ if(btn.textContent==='🐹'){ moleScore++; document.getElementById('moleScore').textContent=`Score: ${moleScore}`; btn.textContent=''; } });
-    moleGrid.appendChild(btn);
-  }
-  clearInterval(moleInterval);
-  moleInterval = setInterval(()=>{
-    moleGrid.querySelectorAll('button').forEach(b=>b.textContent='');
-    let moleBtn = moleGrid.children[Math.floor(Math.random()*9)];
-    moleBtn.textContent='🐹';
-  },1000);
-}
+// WHACK-A-MOLE (basic)
+let whackScore=0,whackInterval;
+function startWhackAMole(){whackScore=0;let canvas=document.getElementById("whackCanvas"),ctx=canvas.getContext("2d");clearInterval(whackInterval);whackInterval=setInterval(()=>{ctx.fillStyle="#111";ctx.fillRect(0,0,300,300);let x=Math.random()*260,y=Math.random()*260;ctx.fillStyle="#FF6347";ctx.fillRect(x,y,40,40);canvas.onclick=function(e){let rect=canvas.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top;if(mx>x&&mx<x+40&&my>y&&my<y+40){whackScore++;document.getElementById("whackScore").textContent="Score: "+whackScore;}}},1000);}
 
-// SIMON SAYS
-let simonSequence=[], simonUser=[], simonLevel=0;
-function startSimonSays(){
-  simonSequence=[]; simonUser=[]; simonLevel=0;
-  const simonButtons = document.getElementById('simonButtons');
-  simonButtons.innerHTML='';
-  ['🔴','🟢','🔵','🟡'].forEach(color=>{
-    let btn=document.createElement('button');
-    btn.textContent=color; btn.style.fontSize='2rem'; btn.style.padding='20px';
-    btn.onclick=()=>{ simonUser.push(color); checkSimon(); };
-    simonButtons.appendChild(btn);
-  });
-  nextSimonLevel();
-}
-function nextSimonLevel(){
-  simonLevel++; simonUser=[];
-  const colors=['🔴','🟢','🔵','🟡'];
-  simonSequence.push(colors[Math.floor(Math.random()*colors.length)]);
-  playSimonSequence();
-}
-function playSimonSequence(){
-  let i=0;
-  document.getElementById('simonMsg').textContent=`Level ${simonLevel}`;
-  let interval=setInterval(()=>{
-    if(i>=simonSequence.length){ clearInterval(interval); return; }
-    document.getElementById('simonMsg').textContent=`Watch: ${simonSequence[i]}`;
-    i++;
-  },800);
-}
-function checkSimon(){
-  let i=simonUser.length-1;
-  if(simonUser[i]!==simonSequence[i]){ document.getElementById('simonMsg').textContent=`Wrong! Game over at level ${simonLevel}`; return; }
-  if(simonUser.length===simonSequence.length){ setTimeout(nextSimonLevel,800); }
-}
+// SIMON SAYS (basic)
+let simonSeq=[];function startSimonSays(){simonSeq=[];let colors=["red","green","blue","yellow"],seq=document.getElementById("simonSequence");for(let i=0;i<5;i++)simonSeq.push(colors[Math.floor(Math.random()*colors.length)]);seq.textContent="Sequence: "+simonSeq.join(", ");}
 
-// Existing showSection/backToMenu functions adapted for new games
-function showSection(id) {
-  document.querySelectorAll('main section').forEach(sec=>sec.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-function backToMenu(){
-  document.querySelectorAll('main section').forEach(sec=>sec.classList.remove('active'));
-  document.getElementById('menu').classList.add('active');
-  clearInterval(moleInterval);
-}
 </script>
 </body>
 </html>
