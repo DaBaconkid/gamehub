@@ -304,14 +304,119 @@ function resetMemorySelection(){ memoryGrid.innerHTML=''; memoryResult.textConte
 function memoryCardClicked(e){ if(memoryBusy) return; const btn = e.currentTarget; const idx = parseInt(btn.dataset.index); if(memoryFlipped.includes(idx)) return; btn.textContent = memoryCards[idx]; memoryFlipped.push(idx); if(memoryFlipped.length===2){ memoryBusy=true; const [i1,i2] = memoryFlipped; if(memoryCards[i1] === memoryCards[i2]){ memoryMatched++; setTimeout(()=>{ [i1,i2].forEach(i=>{ let b = memoryGrid.querySelector(`button[data-index='${i}']`); if(b){ b.disabled=true; b.style.backgroundColor='#7FFFD4'; b.style.color='#004d40'; b.style.cursor='default'; } }); memoryFlipped=[]; memoryBusy=false; if(memoryMatched === memoryCards.length/2) memoryResult.textContent = `🎉 Level ${memoryLevel} Completed!`; }, 400); } else { setTimeout(()=>{ [i1,i2].forEach(i=>{ let b = memoryGrid.querySelector(`button[data-index='${i}']`); if(b) b.textContent=''; }); memoryFlipped=[]; memoryBusy=false; }, 700); } } }
 document.getElementById('memoryStartBtn').addEventListener('click', setupMemory);
 
-/* ================= TIC TAC TOE ================= */
-let tttBoard = Array(9).fill(null); let tttTurn = 'X'; let tttGameOver = false; let tttIsAI = false; const tttCells = document.querySelectorAll('#ticTacToeBoard td'); const tttMsg = document.getElementById('tttMsg');
-function startTicTacToe(){ tttBoard.fill(null); tttTurn='X'; tttGameOver=false; tttMsg.textContent = 'Turn: Player ' + tttTurn; tttCells.forEach(cell=>{ cell.textContent=''; cell.classList.remove('taken'); cell.style.backgroundColor=''; cell.addEventListener('click', tttCellClick); }); tttIsAI = document.querySelector('input[name="tttMode"]:checked').value === 'ai'; if(tttIsAI && tttTurn==='O') aiMove(); }
-function stopTicTacToe(){ tttCells.forEach(cell=>cell.removeEventListener('click', tttCellClick)); tttGameOver=true; }
-function tttCellClick(e){ const cell = e.currentTarget; let index = parseInt(cell.dataset.cell); if(tttGameOver || tttBoard[index] !== null) return; if(tttIsAI && tttTurn === 'O') return; makeMove(index); }
-function makeMove(index){ if(tttBoard[index] !== null) return; tttBoard[index] = tttTurn; tttCells[index].textContent = tttTurn; tttCells[index].classList.add('taken'); if(checkWin(tttTurn)){ tttMsg.textContent = `Player ${tttTurn} wins! 🎉`; tttGameOver = true; stopTicTacToe(); return; } else if(tttBoard.every(c=>c!==null)){ tttMsg.textContent = "It's a tie!"; tttGameOver = true; stopTicTacToe(); return; } tttTurn = tttTurn === 'X' ? 'O' : 'X'; tttMsg.textContent = 'Turn: Player ' + tttTurn; if(tttIsAI && tttTurn === 'O') aiMove(); }
-function checkWin(player){ const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; return wins.some(combo => combo.every(i => tttBoard[i] === player)); }
-function aiMove(){ if(tttGameOver) return; let available = tttBoard.map((v,i)=> v===null ? i : -1).filter(i=>i!==-1); if(available.length===0) return; let choice = available[Math.floor(Math.random()*available.length)]; setTimeout(()=>makeMove(choice), 300); }
+/* ================= TIC TAC TOE (FIXED) ================= */
+// Robust Tic Tac Toe with proper event handling, restart, win/draw detection, and a decent AI (block/win/center/corner/random)
+const tttCells = Array.from(document.querySelectorAll('#ticTacToeBoard td'));
+let tttBoard = Array(9).fill(null);
+let tttTurn = 'X';
+let tttGameOver = false;
+let tttIsAI = false;
+const tttMsg = document.getElementById('tttMsg');
+
+function resetBoardUI(){ tttCells.forEach(cell => { cell.textContent = ''; cell.classList.remove('taken'); cell.style.backgroundColor = ''; }); }
+
+function attachCellListeners(){ tttCells.forEach((cell, idx) => {
+  // ensure no duplicate listeners
+  cell.removeEventListener('click', cell._tttHandler);
+  const handler = (e) => handleCellClick(idx);
+  cell._tttHandler = handler;
+  cell.addEventListener('click', handler);
+}); }
+
+function detachCellListeners(){ tttCells.forEach(cell => { if(cell._tttHandler) cell.removeEventListener('click', cell._tttHandler); }); }
+
+function startTicTacToe(){ // reset state
+  tttBoard = Array(9).fill(null);
+  tttTurn = 'X';
+  tttGameOver = false;
+  tttMsg.textContent = 'Turn: Player ' + tttTurn;
+  resetBoardUI();
+  attachCellListeners();
+  tttIsAI = document.querySelector('input[name="tttMode"]:checked').value === 'ai';
+  // if AI is set and AI goes first (if you wanted), but we keep player X start
+}
+
+function handleCellClick(index){
+  if (tttGameOver) return;
+  if (tttBoard[index] !== null) return; // taken
+  makeMove(index, tttTurn);
+  if (!tttGameOver && tttIsAI && tttTurn === 'O') {
+    // AI makes move after slight delay
+    setTimeout(() => aiMove(), 250);
+  }
+}
+
+function makeMove(index, player){
+  if (tttBoard[index] !== null || tttGameOver) return;
+  tttBoard[index] = player;
+  const cell = tttCells[index];
+  cell.textContent = player;
+  cell.classList.add('taken');
+  // check win
+  if (checkWin(player)) {
+    tttGameOver = true;
+    tttMsg.textContent = `Player ${player} wins! 🎉`;
+    highlightWinning(player);
+    detachCellListeners();
+    return;
+  }
+  // check draw
+  if (tttBoard.every(c => c !== null)) {
+    tttGameOver = true;
+    tttMsg.textContent = "It's a tie!";
+    detachCellListeners();
+    return;
+  }
+  // switch turn
+  tttTurn = (player === 'X') ? 'O' : 'X';
+  tttMsg.textContent = 'Turn: Player ' + tttTurn;
+}
+
+function highlightWinning(player){
+  const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  wins.forEach(combo => {
+    if (combo.every(i => tttBoard[i] === player)) {
+      combo.forEach(i => tttCells[i].style.backgroundColor = '#2ecc71');
+    }
+  });
+}
+
+function checkWin(player){
+  const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  return wins.some(combo => combo.every(i => tttBoard[i] === player));
+}
+
+function aiMove(){
+  if (tttGameOver) return;
+  // AI strategy: Win > Block > Center > Corner > Side
+  const available = tttBoard.map((v,i)=> v===null? i : -1).filter(i=>i!==-1);
+  // 1) Win if possible
+  for (let i of available) {
+    const copy = tttBoard.slice(); copy[i] = 'O';
+    if (isWinner(copy, 'O')) { makeMove(i, 'O'); return; }
+  }
+  // 2) Block opponent
+  for (let i of available) {
+    const copy = tttBoard.slice(); copy[i] = 'X';
+    if (isWinner(copy, 'X')) { makeMove(i, 'O'); return; }
+  }
+  // 3) Take center
+  if (available.includes(4)) { makeMove(4, 'O'); return; }
+  // 4) Take a corner
+  const corners = [0,2,6,8].filter(i => available.includes(i));
+  if (corners.length) { makeMove(corners[Math.floor(Math.random()*corners.length)], 'O'); return; }
+  // 5) Pick random side
+  const sides = [1,3,5,7].filter(i => available.includes(i));
+  if (sides.length) { makeMove(sides[Math.floor(Math.random()*sides.length)], 'O'); return; }
+}
+
+function isWinner(board, player){
+  const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  return wins.some(combo => combo.every(i => board[i] === player));
+}
+
+function stopTicTacToe(){ detachCellListeners(); tttGameOver = true; }
+
 document.getElementById('tttRestartBtn').addEventListener('click', startTicTacToe);
 
 /* ================= NUMBER GUESS ================= */
